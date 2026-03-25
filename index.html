@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>你的灵魂住在哪座城市？</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700&family=Noto+Serif+SC:wght@400;700;900&display=swap');
+
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+body {
+  font-family: 'Noto Sans SC', sans-serif;
+  background: #0a0a12;
+  color: #fff;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ===== START SCREEN ===== */
+.screen { display: none; min-height: 100vh; }
+.screen.active { display: flex; }
+
+#start {
+  flex-direction: column; align-items: center; justify-content: center;
+  background: linear-gradient(165deg, #0a0a12 0%, #121228 40%, #1a0a2e 70%, #0a1628 100%);
+  padding: 32px 24px; text-align: center; position: relative; overflow: hidden;
+}
+
+.glow1 {
+  position: absolute; top: 12%; left: 8%; width: 200px; height: 200px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(233,69,96,0.12) 0%, transparent 70%);
+  filter: blur(50px); animation: breathe 4s ease-in-out infinite;
+}
+.glow2 {
+  position: absolute; bottom: 18%; right: 6%; width: 240px; height: 240px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(72,219,251,0.10) 0%, transparent 70%);
+  filter: blur(60px); animation: breathe 5s ease-in-out infinite 1s;
+}
+
+@keyframes breathe { 0%,100%{opacity:.4} 50%{opacity:.8} }
+@keyframes fadeUp { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:translateY(0)} }
+@keyframes fadeIn { from{opacity:0} to{opacity:1} }
+
+.start-icon { font-size: 56px; margin-bottom: 12px; filter: drop-shadow(0 0 20px rgba(233,69,96,0.3)); animation: fadeUp .8s ease-out; }
+
+.start-title {
+  font-family: 'Noto Serif SC', serif; font-size: 34px; font-weight: 900;
+  line-height: 1.35; letter-spacing: .06em; margin-bottom: 8px; animation: fadeUp .8s ease-out .1s both;
+}
+
+.start-sub {
+  font-size: 14px; color: rgba(255,255,255,.45); letter-spacing: .15em;
+  font-weight: 300; margin-bottom: 48px; animation: fadeUp .8s ease-out .2s both;
+}
+
+.btn-start {
+  font-family: 'Noto Sans SC', sans-serif; font-size: 17px; font-weight: 600;
+  padding: 16px 56px; border-radius: 50px; border: 1px solid rgba(255,255,255,.15);
+  background: linear-gradient(135deg, rgba(233,69,96,.2), rgba(72,219,251,.15));
+  color: #fff; cursor: pointer; letter-spacing: .1em;
+  backdrop-filter: blur(12px); transition: all .3s ease;
+  box-shadow: 0 0 40px rgba(233,69,96,.15), inset 0 1px 0 rgba(255,255,255,.1);
+  animation: fadeUp .8s ease-out .3s both;
+}
+.btn-start:active {
+  background: linear-gradient(135deg, rgba(233,69,96,.35), rgba(72,219,251,.25));
+  transform: scale(.97);
+}
+
+.start-hint { font-size: 12px; color: rgba(255,255,255,.22); margin-top: 28px; animation: fadeUp .8s ease-out .4s both; }
+
+/* ===== QUIZ SCREEN ===== */
+#quiz {
+  flex-direction: column;
+  background: linear-gradient(165deg, #0a0a12 0%, #121228 40%, #1a0a2e 70%, #0a1628 100%);
+  padding: 0; position: relative;
+}
+
+.progress-bar { padding: 20px 24px 0; }
+.progress-info { display: flex; justify-content: space-between; margin-bottom: 10px; }
+.progress-info span { font-size: 12px; color: rgba(255,255,255,.3); }
+.progress-track { height: 3px; background: rgba(255,255,255,.06); border-radius: 4px; overflow: hidden; }
+.progress-fill {
+  height: 100%; width: 0%;
+  background: linear-gradient(90deg, #e94560, #48dbfb);
+  border-radius: 4px; transition: width .5s ease-out;
+}
+
+.quiz-body {
+  flex: 1; display: flex; flex-direction: column; justify-content: center;
+  padding: 40px 28px;
+  transition: opacity .35s ease, transform .35s ease;
+}
+.quiz-body.entering { opacity: 0; transform: translateY(16px); }
+
+.question-text {
+  font-family: 'Noto Serif SC', serif; font-size: 23px; font-weight: 700;
+  line-height: 1.6; letter-spacing: .02em; margin-bottom: 44px;
+}
+
+.options { display: flex; flex-direction: column; gap: 14px; }
+
+.option-btn {
+  font-family: 'Noto Sans SC', sans-serif; font-size: 16px; font-weight: 400;
+  padding: 20px 22px; border-radius: 16px;
+  border: 1px solid rgba(255,255,255,.08);
+  background: rgba(255,255,255,.03);
+  color: rgba(255,255,255,.75); cursor: pointer;
+  text-align: left; line-height: 1.5;
+  transition: all .25s ease; -webkit-appearance: none;
+}
+.option-btn:active, .option-btn.selected {
+  border-color: rgba(233,69,96,.5);
+  background: linear-gradient(135deg, rgba(233,69,96,.15), rgba(72,219,251,.08));
+  color: #fff; transform: scale(.98);
+}
+
+/* ===== RESULT SCREEN ===== */
+#result {
+  flex-direction: column; align-items: center; justify-content: center;
+  padding: 24px; position: relative; overflow: hidden;
+  transition: background .5s ease;
+}
+
+.result-glow {
+  position: absolute; top: 8%; right: -10%; width: 300px; height: 300px;
+  border-radius: 50%; filter: blur(60px); animation: breathe 4s ease-in-out infinite;
+}
+
+.result-card {
+  width: 100%; max-width: 380px;
+  background: rgba(0,0,0,.4); backdrop-filter: blur(20px);
+  border-radius: 24px; padding: 40px 28px;
+  position: relative; z-index: 1;
+  animation: fadeUp .8s cubic-bezier(.16,1,.3,1);
+}
+
+.result-emoji { font-size: 60px; text-align: center; margin-bottom: 8px; }
+
+.result-city {
+  font-family: 'Noto Serif SC', serif; font-size: 38px; font-weight: 900;
+  text-align: center; margin-bottom: 6px; letter-spacing: .04em;
+}
+
+.result-type {
+  text-align: center; margin-bottom: 6px;
+}
+.result-type span {
+  font-family: monospace; font-size: 14px; font-weight: 600;
+  letter-spacing: .3em; padding: 4px 14px;
+  border-radius: 20px; display: inline-block;
+}
+
+.result-vibe {
+  font-size: 15px; color: rgba(255,255,255,.55); text-align: center;
+  font-weight: 300; letter-spacing: .1em; margin-bottom: 24px;
+}
+
+.result-divider { height: 1px; margin-bottom: 24px; }
+
+.result-desc {
+  font-family: 'Noto Serif SC', serif; font-size: 15px;
+  color: rgba(255,255,255,.8); line-height: 2; text-align: justify;
+  margin-bottom: 28px;
+}
+
+.result-quote {
+  font-size: 13px; color: rgba(255,255,255,.45);
+  text-align: center; font-style: italic;
+  padding: 14px 0; border-top: 1px solid rgba(255,255,255,.06);
+  border-bottom: 1px solid rgba(255,255,255,.06);
+  margin-bottom: 24px; letter-spacing: .03em;
+}
+
+.result-watermark {
+  text-align: center; padding-top: 14px;
+  border-top: 1px solid rgba(255,255,255,.06);
+}
+.result-watermark span {
+  font-size: 11px; color: rgba(255,255,255,.18); letter-spacing: .15em;
+}
+
+.result-actions {
+  display: flex; gap: 14px; margin-top: 28px; justify-content: center;
+  animation: fadeIn .8s ease .4s both;
+}
+
+.btn-retry, .btn-share {
+  font-family: 'Noto Sans SC', sans-serif; font-size: 14px;
+  padding: 12px 28px; border-radius: 50px; cursor: pointer;
+  letter-spacing: .05em; transition: all .3s ease; -webkit-appearance: none;
+}
+.btn-retry {
+  font-weight: 500; border: 1px solid rgba(255,255,255,.12);
+  background: rgba(255,255,255,.05); color: rgba(255,255,255,.6);
+}
+.btn-retry:active { background: rgba(255,255,255,.1); }
+.btn-share {
+  font-weight: 600; border: none; color: #fff;
+}
+.btn-share:active { transform: scale(.97); }
+
+.result-hint {
+  font-size: 12px; color: rgba(255,255,255,.18); margin-top: 20px;
+  text-align: center; animation: fadeIn .8s ease .6s both;
+}
+</style>
+</head>
+<body>
+
+<!-- START -->
+<div id="start" class="screen active">
+  <div class="glow1"></div>
+  <div class="glow2"></div>
+  <div class="start-icon">🌍</div>
+  <h1 class="start-title">你的灵魂<br>住在哪座城市？</h1>
+  <p class="start-sub">MBTI × 城市人格测试</p>
+  <button class="btn-start" onclick="startQuiz()">开始测试</button>
+  <p class="start-hint">12道题 · 约2分钟</p>
+</div>
+
+<!-- QUIZ -->
+<div id="quiz" class="screen">
+  <div class="progress-bar">
+    <div class="progress-info">
+      <span id="qNum">1 / 12</span>
+      <span id="qPct">0%</span>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill" id="progressFill"></div>
+    </div>
+  </div>
+  <div class="quiz-body" id="quizBody">
+    <h2 class="question-text" id="questionText"></h2>
+    <div class="options" id="optionsContainer"></div>
+  </div>
+</div>
+
+<!-- RESULT -->
+<div id="result" class="screen">
+  <div class="result-glow" id="resultGlow"></div>
+  <div class="result-card" id="resultCard">
+    <div class="result-emoji" id="resEmoji"></div>
+    <h1 class="result-city" id="resCity"></h1>
+    <div class="result-type"><span id="resType"></span></div>
+    <p class="result-vibe" id="resVibe"></p>
+    <div class="result-divider" id="resDivider"></div>
+    <p class="result-desc" id="resDesc"></p>
+    <div class="result-quote" id="resQuote"></div>
+    <div class="result-watermark"><span>灵魂城市测试 · MBTI × CITY</span></div>
+  </div>
+  <div class="result-actions">
+    <button class="btn-retry" onclick="restart()">重新测试</button>
+    <button class="btn-share" id="btnShare" onclick="shareResult()">截图分享 📸</button>
+  </div>
+  <p class="result-hint">长按截图保存 → 发朋友圈 / 小红书</p>
+</div>
+
+<script>
+const QUESTIONS = [
+  { q: "周末早上醒来，你第一反应是？", a: [{ t: "打电话约人出去浪", d: "E" }, { t: "终于可以一个人待着了", d: "I" }] },
+  { q: "朋友跟你吐槽工作，你会？", a: [{ t: "帮ta分析问题，给方案", d: "T" }, { t: "先共情，让ta把情绪倒完", d: "F" }] },
+  { q: "去一个新城市旅行，你倾向？", a: [{ t: "做好攻略，效率最大化", d: "J" }, { t: "随便走，迷路也是体验", d: "P" }] },
+  { q: "看到一栋废弃的老建筑，你想的是？", a: [{ t: "这里以前住过什么人，发生过什么故事", d: "N" }, { t: "这个结构挺有意思，拍张照", d: "S" }] },
+  { q: "在派对上你通常？", a: [{ t: "认识一堆新朋友，聊到最后才走", d: "E" }, { t: "跟一两个人深聊，提前撤退", d: "I" }] },
+  { q: "做一个重要决定时，你更依赖？", a: [{ t: "逻辑推演，利弊清单", d: "T" }, { t: "直觉，心里那个声音", d: "F" }] },
+  { q: "你的房间通常是？", a: [{ t: "整洁有序，东西都有固定位置", d: "J" }, { t: "创意混乱，但我知道东西在哪", d: "P" }] },
+  { q: "读一本书，你更喜欢？", a: [{ t: "讲一个宏大的理论或世界观", d: "N" }, { t: "讲真实的人和具体的事", d: "S" }] },
+  { q: "跟人发生分歧，你的反应？", a: [{ t: "直接说出来，辩论是乐趣", d: "E" }, { t: "内心戏很多，但不一定说", d: "I" }] },
+  { q: "选一个词形容理想生活？", a: [{ t: "可能性", d: "N" }, { t: "确定感", d: "S" }] },
+  { q: "有人给你画了张画像，不太像你，你会？", a: [{ t: "诚实指出不像的地方", d: "T" }, { t: "先夸好看，不伤人家心", d: "F" }] },
+  { q: "明天有一件大事，今晚你？", a: [{ t: "提前准备好一切，检查两遍", d: "J" }, { t: "到时候再说，临场发挥更好", d: "P" }] },
+];
+
+const CITIES = {
+  INTJ: { city:"柏林", emoji:"🇩🇪", vibe:"冷峻的战略家", quote:"我不冷，我只是不浪费热量。", desc:"你像柏林一样——表面冷硬，内核是一整套精密运转的系统。你不需要被所有人喜欢，你需要被正确的人理解。这座城市不讨好任何人，但去过的人都说：它改变了我的思维方式。", color:"#1a1a2e", accent:"#e94560", gradient:"linear-gradient(135deg,#1a1a2e,#16213e,#0f3460)" },
+  INTP: { city:"京都", emoji:"🇯🇵", vibe:"安静的深渊", quote:"别催我，我在想。", desc:"你像京都——在极致的安静里藏着几千年的复杂。别人看到的是枯山水和抹茶，你看到的是石头摆放背后的宇宙秩序。你不说话的时候，脑子里已经转了三圈。", color:"#2d2d2d", accent:"#c9a96e", gradient:"linear-gradient(135deg,#2d2d2d,#3d3024,#4a3728)" },
+  ENTJ: { city:"上海", emoji:"🇨🇳", vibe:"野心的心脏", quote:"结果说话。", desc:"你就是上海——快、准、不留情。你站在外滩看浦东的时候不是在感慨，是在计算。你的野心不是写在PPT里的，是写在行动里的。这座城市容不下犹豫的人，你也是。", color:"#0c0c1d", accent:"#f5c518", gradient:"linear-gradient(135deg,#0c0c1d,#1a1a3e,#2a1a4e)" },
+  ENTP: { city:"巴塞罗那", emoji:"🇪🇸", vibe:"永远在燃烧的点子", quote:"规则是用来重新发明的。", desc:"你是巴塞罗那——高迪造了一座没人见过的教堂，你每天脑子里也在造三座。你的对话像兰布拉大道，永远热闹，永远有新东西冒出来。无聊是你最大的敌人，可能性是你的氧气。", color:"#1a0a2e", accent:"#ff6b35", gradient:"linear-gradient(135deg,#1a0a2e,#3d1a5e,#5e2a7e)" },
+  INFJ: { city:"布拉格", emoji:"🇨🇿", vibe:"迷雾中的先知", quote:"我知道你想说什么，但你不知道我在想什么。", desc:"你是布拉格——所有人都觉得你神秘而美丽，但没人真正走进过你最深的那条巷子。你看人比任何人都准，但你不说。你在人群中笑着，同时在写一本只给自己看的书。", color:"#1a1a2e", accent:"#9b59b6", gradient:"linear-gradient(135deg,#1a1a2e,#2e1a3e,#3e2a4e)" },
+  INFP: { city:"清迈", emoji:"🇹🇭", vibe:"温柔的乌托邦", quote:"世界那么吵，我选择安静地相信。", desc:"你是清迈——慢的、温的、不争的，但你的内心是一整片热带雨林，什么都在疯长。你相信世界应该更好，而且你是认真的。你写在日记里的那些话，比大多数人说出口的都勇敢。", color:"#1a2e1a", accent:"#e8a87c", gradient:"linear-gradient(135deg,#1a2e1a,#2e3e1a,#3e4e2a)" },
+  ENFJ: { city:"巴黎", emoji:"🇫🇷", vibe:"带着光环的引力场", quote:"我很好，你呢？", desc:"你是巴黎——每个人都被你吸引，你让他们觉得自己很重要。你天生知道怎么点亮一个房间。你的危险在于：你太擅长照顾别人，以至于忘了自己也需要被照顾。", color:"#1a1a2e", accent:"#e74c6f", gradient:"linear-gradient(135deg,#1a1a2e,#2e1a2e,#4e1a3e)" },
+  ENFP: { city:"墨尔本", emoji:"🇦🇺", vibe:"永不着陆的蝴蝶", quote:"人生苦短，我先喝杯手冲。", desc:"你是墨尔本——每个巷子转角都是一家你没见过的咖啡馆，每天的天气都不一样，但永远有趣。你让每个遇见你的人都觉得世界突然变大了。你最大的才华是让可能性变成现实。", color:"#0a1628", accent:"#00b4d8", gradient:"linear-gradient(135deg,#0a1628,#1a2638,#0a3648)" },
+  ISTJ: { city:"东京", emoji:"🇯🇵", vibe:"精密的秩序之美", quote:"说到做到，不用提醒。", desc:"你是东京——准时到秒，干净到极致，每一个细节都被照顾到了。你的可靠不是无聊，是一种让所有人安心的超能力。你不需要站在聚光灯下，因为没有你，整个舞台都会塌。", color:"#1a1a28", accent:"#ff4757", gradient:"linear-gradient(135deg,#1a1a28,#2a1a38,#1a2a48)" },
+  ISFJ: { city:"成都", emoji:"🇨🇳", vibe:"火锅味的安全感", quote:"吃了吗？没吃我给你煮。", desc:"你是成都——表面慢悠悠的，但你的温暖能融化所有防备。你记得每个人的生日、喜好和那句不经意说过的话。你是朋友圈里那个不声不响但所有人都离不开的人。", color:"#2e1a0a", accent:"#ff6348", gradient:"linear-gradient(135deg,#2e1a0a,#3e2a1a,#4e3a2a)" },
+  ESTJ: { city:"北京", emoji:"🇨🇳", vibe:"规则的制定者", quote:"说重点。", desc:"你是北京——大气、直接、不拐弯。你天生就知道事情应该怎么办，而且你会确保它被办成。你的权威感不是装出来的，是做出来的。你说话像长安街，又宽又直。", color:"#1a0a0a", accent:"#c0392b", gradient:"linear-gradient(135deg,#1a0a0a,#2e1a1a,#3e1a0a)" },
+  ESFJ: { city:"曼谷", emoji:"🇹🇭", vibe:"热带的拥抱", quote:"开心就好，不开心我来想办法。", desc:"你是曼谷——热情到扑面而来，让每个人都觉得被欢迎。你的社交直觉是一种天赋，你能在五分钟内让陌生人觉得认识了你五年。你照顾所有人，像曼谷的夜市，永远灯火通明。", color:"#2e1a2e", accent:"#f39c12", gradient:"linear-gradient(135deg,#2e1a2e,#3e2a1e,#4e3a0e)" },
+  ISTP: { city:"雷克雅未克", emoji:"🇮🇸", vibe:"冰原上的独行者", quote:"别说了，让我看看。", desc:"你是冰岛——安静、辽阔、极端。你不需要人群来证明自己存在。你用双手解决问题，用行动代替语言。你看起来冷，但在极光出现的那一刻，你比任何人都知道什么叫壮观。", color:"#0a1a2e", accent:"#48dbfb", gradient:"linear-gradient(135deg,#0a1a2e,#0a2e3e,#0a3e4e)" },
+  ISFP: { city:"佛罗伦萨", emoji:"🇮🇹", vibe:"文艺复兴的灵魂", quote:"慢一点，才能看见。", desc:"你是佛罗伦萨——在你的世界里，一束光打在墙上的角度都值得停下来看。你不张扬，但你创造的东西让人心里一颤。你的审美不是学来的，是长在骨头里的。", color:"#2e2a1a", accent:"#d4a373", gradient:"linear-gradient(135deg,#2e2a1a,#3e3a2a,#4e4a3a)" },
+  ESTP: { city:"香港", emoji:"🇭🇰", vibe:"永不停歇的脉搏", quote:"机会不等人，我也不等。", desc:"你是香港——快、猛、刺激。你在混乱中如鱼得水，在压力下反而兴奋。你不等机会来找你，你冲上去抢。这座城市从不睡觉，你也是——因为睡着了就会错过什么。", color:"#0a0a1a", accent:"#e84393", gradient:"linear-gradient(135deg,#0a0a1a,#1a0a2a,#2a0a3a)" },
+  ESFP: { city:"重庆", emoji:"🇨🇳", vibe:"3D的快乐制造机", quote:"管那么多干嘛，先吃！", desc:"你是重庆——立体的、火辣的、不讲道理的快乐。你站在洪崖洞看夜景的时候，别人看到灯光，你看到整个宇宙在对你笑。你的笑声比火锅还烫，你的快乐是会传染的那种。", color:"#2e0a0a", accent:"#fd79a8", gradient:"linear-gradient(135deg,#2e0a0a,#3e1a0a,#4e0a1a)" },
+};
+
+let currentQ = 0;
+let scores = { E:0, I:0, S:0, N:0, T:0, F:0, J:0, P:0 };
+
+function show(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function startQuiz() {
+  currentQ = 0;
+  scores = { E:0, I:0, S:0, N:0, T:0, F:0, J:0, P:0 };
+  show('quiz');
+  renderQuestion();
+}
+
+function renderQuestion() {
+  const q = QUESTIONS[currentQ];
+  const body = document.getElementById('quizBody');
+  const pct = Math.round((currentQ / QUESTIONS.length) * 100);
+
+  document.getElementById('qNum').textContent = `${currentQ + 1} / ${QUESTIONS.length}`;
+  document.getElementById('qPct').textContent = `${pct}%`;
+  document.getElementById('progressFill').style.width = `${pct}%`;
+
+  body.classList.add('entering');
+  setTimeout(() => {
+    document.getElementById('questionText').textContent = q.q;
+    const container = document.getElementById('optionsContainer');
+    container.innerHTML = '';
+    q.a.forEach((ans, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'option-btn';
+      btn.textContent = ans.t;
+      btn.onclick = () => selectAnswer(i, ans.d);
+      container.appendChild(btn);
+    });
+    body.classList.remove('entering');
+  }, 60);
+}
+
+function selectAnswer(idx, dim) {
+  const btns = document.querySelectorAll('.option-btn');
+  btns.forEach((b, i) => {
+    b.classList.toggle('selected', i === idx);
+    b.style.pointerEvents = 'none';
+  });
+
+  scores[dim]++;
+
+  setTimeout(() => {
+    currentQ++;
+    if (currentQ >= QUESTIONS.length) {
+      showResult();
+    } else {
+      renderQuestion();
+    }
+  }, 350);
+}
+
+function getMBTI() {
+  return (scores.E >= scores.I ? 'E' : 'I')
+       + (scores.S >= scores.N ? 'S' : 'N')
+       + (scores.T >= scores.F ? 'T' : 'F')
+       + (scores.J >= scores.P ? 'J' : 'P');
+}
+
+function showResult() {
+  const type = getMBTI();
+  const r = CITIES[type];
+
+  const resultEl = document.getElementById('result');
+  resultEl.style.background = r.gradient;
+
+  document.getElementById('resultGlow').style.background =
+    `radial-gradient(circle, ${r.accent}22 0%, transparent 70%)`;
+
+  document.getElementById('resultCard').style.border = `1px solid ${r.accent}30`;
+  document.getElementById('resultCard').style.boxShadow =
+    `0 0 80px ${r.accent}15, 0 20px 60px rgba(0,0,0,.3)`;
+
+  document.getElementById('resEmoji').textContent = r.emoji;
+  document.getElementById('resEmoji').style.filter = `drop-shadow(0 0 30px ${r.accent}50)`;
+
+  document.getElementById('resCity').textContent = r.city;
+  document.getElementById('resCity').style.textShadow = `0 0 40px ${r.accent}40`;
+
+  const typeSpan = document.getElementById('resType');
+  typeSpan.textContent = type;
+  typeSpan.style.color = r.accent;
+  typeSpan.style.background = `${r.accent}15`;
+  typeSpan.style.border = `1px solid ${r.accent}30`;
+
+  document.getElementById('resVibe').textContent = r.vibe;
+  document.getElementById('resDivider').style.background =
+    `linear-gradient(90deg, transparent, ${r.accent}30, transparent)`;
+  document.getElementById('resDesc').textContent = r.desc;
+  document.getElementById('resQuote').textContent = `"${r.quote}"`;
+
+  const shareBtn = document.getElementById('btnShare');
+  shareBtn.style.background = `linear-gradient(135deg, ${r.accent}25, ${r.accent}10)`;
+  shareBtn.style.border = `1px solid ${r.accent}40`;
+  shareBtn.style.boxShadow = `0 0 30px ${r.accent}15`;
+
+  show('result');
+}
+
+function restart() {
+  show('start');
+}
+
+function shareResult() {
+  const type = getMBTI();
+  const r = CITIES[type];
+  const text = `我的灵魂住在${r.city}！（${type} · ${r.vibe}）\n\n${r.desc}\n\n🌍 灵魂城市测试 · MBTI × CITY`;
+
+  if (navigator.share) {
+    navigator.share({ title: '你的灵魂住在哪座城市？', text: text }).catch(() => {});
+  } else if (navigator.clipboard) {
+    navigator.clipboard.writeText(text).then(() => {
+      alert('已复制到剪贴板，去分享吧！');
+    });
+  } else {
+    prompt('复制以下内容分享：', text);
+  }
+}
+</script>
+</body>
+</html>
